@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="section">
+      <nav class="nav">
+        <input
+          type="search"
+          name=""
+          id="search-bar"
+          placeholder="search a user"
+        />
+        <div class="flex-r">
+          <div>
+            <select id="select-status">
+              <option value="All" selected>Select Transaction Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Failed">Failed</option>
+              <option value="Success">Successful</option>
+            </select>
+          </div>
+
+          <select id="sort">
+            <option value="All" selected>Sort by</option>
+            <option value="ascending" class="ascending-btn">
+              Ascending order
+            </option>
+            <option value="descending" class="descending-btn">
+              Descending order
+            </option>
+          </select>
+        </div>
+      </nav>
+
+      <main class="main">
+        <p class="error-message">Oops! Not found</p>
+        <table class="table">
+          <thead class="table-header">
+            <tr class="table-header-rows">
+              <th class="name-col">Name</th>
+              <th class="email-col">Email</th>
+              <th class="status-col">Transaction Status</th>
+              <th class="amount-col">Amount</th>
+              <th class="date-col">Date of payment</th>
+            </tr>
+          </thead>
+
+          <tbody class="table-body"></tbody>
+        </table>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
