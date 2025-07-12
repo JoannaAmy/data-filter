@@ -1,22 +1,26 @@
 const table = document.querySelector(".table");
 const tableData = document.querySelector(".table-body");
 const search = document.querySelector("#search-bar");
-const select = document.querySelector("#select-status");
-const sort = document.querySelector("#sort");
+const selectStatus = document.querySelector("#select-status");
+const sortName = document.querySelector("#sort");
 const errorMsg = document.querySelector(".error-message");
+const clear = document.querySelector(".clear");
+const sortDate = document.querySelector("#sort-date");
+const sortAmount = document.querySelector("#sort-amount");
 let tableArray = [];
+
+const parseFloat = (str) => Number(str.replace(/,/g, ""));
 
 function renderTable(data) {
   tableData.innerHTML = "";
   data.forEach((user) => {
     const tableRow = `
         <tr class="table-rows">
-        
         <td>${user.name}</td>
         <td>${user.email} </td>
         <td>${user.transactionStatus} </td>
-        <td>${user.dateOfPayment} </td>
         <td>${user.amountPaid} </td>
+        <td>${user.dateOfPayment} </td>
         </tr>
         `;
     tableData.innerHTML += tableRow;
@@ -34,65 +38,89 @@ fetch("./data.json")
     const lastSearch = sessionStorage.getItem("lastSearch");
     if (lastSearch) {
       search.value = lastSearch;
-      const filteredData = tableArray.filter(
-        (user) =>
-          user.name.toLowerCase().includes(lastSearch) ||
-          user.name.toLowerCase().includes(lastSearch)
-      );
-      renderTable(filteredData);
+      activeFilters();
     }
   });
 
-sort.addEventListener("change", (e) => {
-  const sortedData = e.target.value;
+function activeFilters() {
+  let data = [...tableArray];
 
-  if (sortedData === "ascending") {
-    const sortedAscendingData = [...tableArray].sort((a, b) =>
-      a.name.localeCompare(b.name)
-    );
-    renderTable(sortedAscendingData);
-  } else if (sortedData === "descending") {
-    const sortedDescendingData = [...tableArray].sort((a, b) =>
-      b.name.localeCompare(a.name)
-    );
-    renderTable(sortedDescendingData);
-  } else {
-    renderTable(tableArray);
-  }
-});
+  const searchValue = search.value.trim().toLowerCase();
+  const nameSort = sortName.value;
+  const dateSort = sortDate.value;
+  const amountSort = sortAmount.value;
+  const statusValue = selectStatus.value;
 
-select.addEventListener("change", (e) => {
-  const selectedStatus = e.target.value;
-
-  let filteredStatus = tableArray;
-
-  if (selectedStatus !== "All") {
-    filteredStatus = tableArray.filter(
-      (user) => user.transactionStatus === selectedStatus
-    );
+  if (searchValue) {
+    data = data.filter((user) => user.name.toLowerCase().includes(searchValue));
   }
 
-  renderTable(filteredStatus);
-});
+  if (statusValue !== "All") {
+    data = data.filter((user) => user.transactionStatus === statusValue);
+  }
 
-search.addEventListener("input", (e) => {
-  const searchValue = e.target.value.toLowerCase();
+  if (nameSort === "ascending") {
+    data = data.filter((a, b) => a.name.localeCompare(b.name));
+  }
+  if (nameSort === "descending") {
+    data = data.filter((a, b) => b.name.localeCompare(a.name));
+  }
 
-  const filteredData = tableArray.filter((user) => {
-    return (
-      user.name.toLowerCase().includes(searchValue) ||
-      user.name.toLowerCase().includes(searchValue)
+  if (amountSort === "highest") {
+    data = data.filter(
+      (a, b) => parseFloat(b.amountPaid) - parseFloat(a.amountPaid)
     );
-  });
-  sessionStorage.setItem("lastSearch", searchValue);
+  }
+  if (amountSort === "lowest") {
+    data = data.filter(
+      (a, b) => parseFloat(a.amountPaid) - parseFloat(b.amountPaid)
+    );
+  }
 
-  if (filteredData.length === 0) {
+  if (dateSort === "newest") {
+    data = data.filter(
+      (a, b) => new Date(b.amountPaid) - new Date(a.amountPaid)
+    );
+  }
+  if (dateSort === "oldest") {
+    data = data.filter(
+      (a, b) => new Date(a.amountPaid) - new Date(b.amountPaid)
+    );
+  }
+
+  if (data.length === 0) {
     errorMsg.style.display = "block";
     table.style.display = "none";
   } else {
     errorMsg.style.display = "none";
     table.style.display = "block";
+    renderTable(data);
   }
+}
 
-  renderTable(filteredData);
+sortName.addEventListener("change", activeFilters);
+
+sortDate.addEventListener("change", activeFilters);
+
+sortAmount.addEventListener("change", activeFilters);
+
+selectStatus.addEventListener("change", activeFilters);
+
+search.addEventListener("input", () => {
+  sessionStorage.setItem("lastSearch", search.value.toLowerCase());
+  activeFilters();
+});
+
+clear.addEventListener("click", () => {
+  search.value = "";
+  sortName.value = "All";
+  selectStatus.value = "All";
+  sortDate.value = "All";
+  sortAmount.value = "All";
+
+  sessionStorage.removeItem("lastSearch");
+
+  errorMsg.style.display = "none";
+
+  activeFilters();
 });
